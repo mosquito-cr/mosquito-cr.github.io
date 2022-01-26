@@ -1,0 +1,19 @@
+title: Mosquito
+url: "https://mosquito-cr.github.io" # the base hostname & protocol for your site
+
+# Build settings
+markdown: kramdown
+exclude:
+ - Gemfile
+ - Gemfile.lock
+ - vendor
+ - scripts
+ - config.ru
+ - Procfile
+ - nginx
+ - Dockerfile
+ - prod-config-generator.rb
+
+include:
+  - .well-known
+  - robots.txt
