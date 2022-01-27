@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-type'>
+    <title>Mosquito</title>
+    <link href="/css/main.css" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/images/logo/logomark.svg" type="image/svg+xml">
+    <link rel="alternate" type="application/atom+xml" href="/atom.xml">
+    <meta config="NOFOLLOW,NOINDEX" name="robots">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="header">
+        <h1>
+          <a href="/">
+            <img src="/images/logo/logotype_horizontal.svg" alt="Mosquito" style="display: inline-block; width: 17rem;">
+          </a>
+        </h1>
+        <p>A lightweight background task framework for Crystal applications.</p>
+      </div>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito">Source Code</a> &middot;
+        <a href="https://mosquito-cr.github.io/mosquito/Mosquito.html">Docs</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/wiki">Wiki</a>
+      </nav>
+      <hr>
+
+
+<div class="two-column col-30-70">
+  <div class="column content">
+    <toc>
+      
+      <h1>Table of Contents</h1>
+      <h2><a href="#top">Mosquito Manual</a></h2>
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#terminology">Terminology</a></li>
+<li class="toc-entry toc-h1"><a href="#usage">Usage</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#installation">Installation</a></li>
+<li class="toc-entry toc-h2"><a href="#configuration">Configuration</a></li>
+<li class="toc-entry toc-h2"><a href="#declaring-a-job">Declaring a job</a></li>
+<li class="toc-entry toc-h2"><a href="#queuing-a-job">Queuing a job</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#periodic-jobs">Periodic Jobs</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#example">Example</a></li>
+<li class="toc-entry toc-h2"><a href="#periodic-job-design">Periodic Job Design</a></li>
+<li class="toc-entry toc-h2"><a href="#execution-frequency">Execution Frequency</a></li>
+<li class="toc-entry toc-h2"><a href="#execution-environment">Execution Environment</a></li>
+<li class="toc-entry toc-h2"><a href="#retries">Retries</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#queued-jobs">Queued Jobs</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#example-1">Example</a></li>
+<li class="toc-entry toc-h2"><a href="#job-design">Job Design</a></li>
+<li class="toc-entry toc-h2"><a href="#execution">Execution</a></li>
+<li class="toc-entry toc-h2"><a href="#failure">Failure</a></li>
+<li class="toc-entry toc-h2"><a href="#logs">Logs</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#parameters">Parameters</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#default-values">Default Values</a></li>
+<li class="toc-entry toc-h2"><a href="#caveats">Caveats</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#scheduling-jobs">Scheduling Jobs</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#caveats-1">Caveats</a></li>
+<li class="toc-entry toc-h2"><a href="#per-job-retry-configuration">Per-job retry configuration</a></li>
+<li class="toc-entry toc-h2"><a href="#periodic-jobs-and-retries">Periodic jobs and retries</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#primitive-serialization">Primitive Serialization</a></li>
+</ul>
+      
+
+      Other pages in the manual:
+
+      
+      <ul>
+      
+        
+      
+        
+          <li><a href="/manual/lucky_framework.html">Using Mosquito with Lucky</a>
+        
+      
+        
+          <li><a href="/manual/rate_limiting.html">Rate Limiting Jobs</a>
+        
+      
+        
+          <li><a href="/manual/serialization.html">Custom Serialization</a>
+        
+      
+      </ul>
+    </toc>
+  </div>
+
+  <div class="column content">
+    <h1>Mosquito Manual</h1>
+    <h1 id="terminology">
+<a class="anchor" href="#terminology" aria-hidden="true"><span class="octicon octicon-link"></span></a>Terminology</h1>
+
+<p><strong>Job</strong> - a collection of code which can be run several times, either on
+demand, scheduled for a specific time, or periodically.</p>
+
+<p><strong>Task</strong> - A specific unit of work to be performed by a job.</p>
+
+<p><strong>PeriodicJob</strong> - A job which is automatically scheduled to run once every
+interval.</p>
+
+<p><strong>QueuedJob</strong> - A job which is scheduled to run at a specific time, or as soon
+as possible.</p>
+
+<h1 id="usage">
+<a class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h1>
+
+<h2 id="installation">
+<a class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Update your <code class="language-plaintext highlighter-rouge">shard.yml</code> to include mosquito:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">dependencies:
+</span><span class="gi">+  mosquito:
++    github: mosquito-cr/mosquito
+</span></code></pre></div></div>
+<p> </p>
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># require your application here</span>
+<span class="nb">require</span> <span class="s2">"./my_application/*.cr"</span>
+
+<span class="no">Mosquito</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">settings</span><span class="o">|</span>
+  <span class="n">settings</span><span class="p">.</span><span class="nf">redis_url</span> <span class="o">=</span> <span class="s2">"redis://path-to-your-redis:6379"</span>
+<span class="k">end</span>
+
+<span class="no">Mosquito</span><span class="o">::</span><span class="no">Runner</span><span class="p">.</span><span class="nf">start</span>
+</code></pre></div></div>
+
+<p>Your worker can then be run using <code class="language-plaintext highlighter-rouge">crystal run src/worker.cr</code>.</p>
+
+<h2 id="configuration">
+<a class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>For a fine grained control of the way Mosquito runs jobs extra parameters may
+be passed in the <code class="language-plaintext highlighter-rouge">Mosquito.configure</code> block. The default values for these
+settings should suffice most runner configurations.</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">redis_url : String</code> - a redis connection string, eg
+<code class="language-plaintext highlighter-rouge">rediss://password@host/database_number</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">idle_wait : Float | Time::Span = 0.1</code> (Seconds, default: 0.1s) - the time
+Mosquito <code class="language-plaintext highlighter-rouge">sleep</code>s between checking for pending jobs.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">successful_job_ttl : Int = 1</code> (Seconds, default: 1s) - how long a job config
+is persisted in Redis after a task succeeds.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">failed_job_ttl : Int = 86400</code> (Seconds, default: 1 day) - how long a job
+config is persisted in Redis after a task fails.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">run_cron_scheduler : Bool = true</code> - toggle the cron scheduler on or off.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">run_from : Array(String) = []</code> - a list of queue names to pull jobs from.</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Mosquito</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">settings</span><span class="o">|</span>
+  <span class="n">settings</span><span class="p">.</span><span class="nf">idle_wait</span> <span class="o">=</span> <span class="mi">3</span><span class="p">.</span><span class="nf">seconds</span>
+  <span class="n">settings</span><span class="p">.</span><span class="nf">successful_job_ttl</span> <span class="o">=</span> <span class="mi">300</span> <span class="c1"># 5 minutes</span>
+  <span class="n">settings</span><span class="p">.</span><span class="nf">failed_job_ttl</span> <span class="o">=</span> <span class="mi">86400</span> <span class="c1"># 1 day</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="declaring-a-job">
+<a class="anchor" href="#declaring-a-job" aria-hidden="true"><span class="octicon octicon-link"></span></a>Declaring a job</h2>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># src/jobs/puts_job.cr</span>
+<span class="k">class</span> <span class="nc">PutsJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="n">params</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="nb">puts</span> <span class="n">message</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="queuing-a-job">
+<a class="anchor" href="#queuing-a-job" aria-hidden="true"><span class="octicon octicon-link"></span></a>Queuing a job</h2>
+
+<p>Queued Jobs are enqueued with the
+<a href="https://mosquito-cr.github.io/mosquito/Mosquito/QueuedJob.html#enqueue%28indelay_interval%3ATime%3A%3ASpan%29%3ATask-instance-method"><code class="language-plaintext highlighter-rouge">#enqueue</code></a>
+method:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">PutsJob</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">message: </span><span class="s2">"Hello from the other side"</span><span class="p">).</span><span class="nf">enqueue</span>
+</code></pre></div></div>
+
+<h1 id="periodic-jobs">
+<a class="anchor" href="#periodic-jobs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Periodic Jobs</h1>
+
+<p><em>AKA CRON jobs</em></p>
+
+<p>Periodic jobs run according to a predefined period rather than manually
+enqueued. They take no parameters and, since the job will be re-executed on
+schedule anyway, periodic jobs are not automatically re-attempted upon failure.</p>
+
+<h2 id="example">
+<a class="anchor" href="#example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example</h2>
+
+<p>This is a periodic job:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PeriodicallyPutsJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">PeriodicJob</span>
+  <span class="n">run_every</span> <span class="mi">1</span><span class="p">.</span><span class="nf">minute</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="n">emotions</span> <span class="o">=</span> <span class="sx">%w{happy sad angry optimistic political skeptical epuhoric}</span>
+    <span class="n">log</span> <span class="s2">"The time is now </span><span class="si">#{</span><span class="no">Time</span><span class="p">.</span><span class="nf">now</span><span class="si">}</span><span class="s2"> and the wizard is feeling </span><span class="si">#{</span><span class="n">emotions</span><span class="p">.</span><span class="nf">sample</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>And this is the output from running Mosquito with PeriodicallyPutsJob active:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2017-11-06 17:20:13 - Mosquito is buzzing...
+2017-11-06 17:20:13 - Queues: periodically_puts_job
+2017-11-06 17:20:13 - Running task periodically_puts_job&lt;...&gt; from periodically_puts_job
+2017-11-06 17:20:13 - [PeriodicallyPutsJob] The time is now 2017-11-06 17:20:13 and the wizard is feeling skeptical
+2017-11-06 17:20:13 - task periodically_puts_job&lt;...&gt; succeeded, took 0.0 seconds
+2017-11-06 17:21:14 - Queues: periodically_puts_job
+2017-11-06 17:21:14 - Running task periodically_puts_job&lt;...&gt; from periodically_puts_job
+2017-11-06 17:21:14 - [PeriodicallyPutsJob] The time is now 2017-11-06 17:21:14 and the wizard is feeling optimistic
+2017-11-06 17:21:14 - task periodically_puts_job&lt;...&gt; succeeded, took 0.0 seconds
+2017-11-06 17:22:15 - Queues: periodically_puts_job
+2017-11-06 17:22:15 - Running task periodically_puts_job&lt;...&gt; from periodically_puts_job
+2017-11-06 17:22:15 - [PeriodicallyPutsJob] The time is now 2017-11-06 17:22:15 and the wizard is feeling political
+2017-11-06 17:22:15 - task periodically_puts_job&lt;...&gt; succeeded, took 0.0 seconds
+</code></pre></div></div>
+
+<h2 id="periodic-job-design">
+<a class="anchor" href="#periodic-job-design" aria-hidden="true"><span class="octicon octicon-link"></span></a>Periodic Job Design</h2>
+
+<p>Periodic jobs should be minimal and fast, but more important, they should be:</p>
+
+<ol>
+  <li>
+<a href="https://en.wikipedia.org/wiki/Idempotence">Idempotent</a> - should be
+resilient enough to be run at <em>any</em> frequency, regardless of the requested
+interval.</li>
+  <li>Immune to failure - no condition should exist in the job which leads to a
+broken <em>application</em> state.</li>
+  <li>Self sufficient - any input required to complete the task must be acquired
+as part of the task run.</li>
+</ol>
+
+<h2 id="execution-frequency">
+<a class="anchor" href="#execution-frequency" aria-hidden="true"><span class="octicon octicon-link"></span></a>Execution Frequency</h2>
+
+<p>Jobs are declared so that they are run <em>at least</em> every interval. No guarantee
+is provided they will not run more frequently. Specifically, a worker restart
+will execute every periodic job once.</p>
+
+<p>Specify the execution frequency with the <code class="language-plaintext highlighter-rouge">run_every</code> macro: <code class="language-plaintext highlighter-rouge">run_every
+1.minute</code>. Any <code class="language-plaintext highlighter-rouge">Time::Span</code> or <code class="language-plaintext highlighter-rouge">Time::MonthSpan</code> is a valid frequency.</p>
+
+<h2 id="execution-environment">
+<a class="anchor" href="#execution-environment" aria-hidden="true"><span class="octicon octicon-link"></span></a>Execution Environment</h2>
+
+<p>Periodic jobs are similar to CRON. The periodic scheduler has no application
+context and cannot initialize scheduled jobs with any knowledge about the
+application state. As a result no inputs are available to periodic jobs. Any
+input required must be fetched during the #perform method.</p>
+
+<h2 id="retries">
+<a class="anchor" href="#retries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Retries</h2>
+
+<p>Upon failure, a periodic job is not retried. A periodic job is expected to run
+again later on the pre-existing schedule.</p>
+
+<h1 id="queued-jobs">
+<a class="anchor" href="#queued-jobs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Queued Jobs</h1>
+
+<p><em>AKA Background jobs</em></p>
+
+<p>Mosquito Queued jobs are executed on demand.</p>
+
+<h2 id="example-1">
+<a class="anchor" href="#example-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example</h2>
+
+<p>This is a queued job:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">LongRunningTaskJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="n">params</span> <span class="n">user_id</span> <span class="p">:</span> <span class="no">Int32</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="no">AssetCompressor</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">for: </span><span class="n">user</span><span class="p">).</span><span class="nf">compress</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">user</span> <span class="p">:</span> <span class="no">User</span>
+    <span class="n">found_user</span> <span class="o">=</span> <span class="no">UserService</span><span class="p">.</span><span class="nf">fetch</span> <span class="n">user_id</span>
+    <span class="nb">fail</span> <span class="k">unless</span> <span class="n">found_user</span>
+    <span class="n">found_user</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="job-design">
+<a class="anchor" href="#job-design" aria-hidden="true"><span class="octicon octicon-link"></span></a>Job Design</h2>
+
+<p>Queued jobs needn’t be fast or immune to failure, but they should be tolerant
+of retries. By default a failed job is retried up to 4 times on a predictable
+schedule before mosquito gives up.</p>
+
+<p>It is best to keep your application logic in your application and simply use a
+background job to trigger that logic. Instead of:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">perform</span>
+  <span class="c1"># send welcome email</span>
+  <span class="n">sign_up_email</span> <span class="o">=</span> <span class="no">UserEmailer</span><span class="p">.</span><span class="nf">sign_up_email</span><span class="p">.</span><span class="nf">render</span> <span class="n">user</span>
+  <span class="no">EmailVendor</span><span class="p">.</span><span class="nf">send</span> <span class="ss">email: </span><span class="n">sign_up_email</span>
+
+  <span class="c1"># notify admins of a new user</span>
+  <span class="n">admin_notification</span> <span class="o">=</span> <span class="no">AdminEmailer</span><span class="p">.</span><span class="nf">user_signed_up</span><span class="p">.</span><span class="nf">render</span> <span class="n">user</span>
+  <span class="no">EmailVendor</span><span class="p">.</span><span class="nf">send</span> <span class="ss">email: </span><span class="n">admin_notification</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Consider putting the “stuff that happens when a user signs up” in an Operation
+or other service object:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">perform</span>
+  <span class="no">SignUpOperation</span><span class="p">.</span><span class="nf">perform</span> <span class="n">user</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="execution">
+<a class="anchor" href="#execution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Execution</h2>
+
+<p>Queued jobs are manually enqueued and then expected to be executed <em>later</em> but
+with no specification about how soon that execution will take place.</p>
+
+<p>In order to execute a job, simply ask it to be enqueued:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">new_user</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">create</span> <span class="ss">email: </span><span class="s2">"someone@somewhere.com"</span>
+<span class="no">SendWelcomeEmailJob</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">user: </span><span class="n">new_user</span><span class="p">).</span><span class="nf">enqueue</span>
+</code></pre></div></div>
+
+<h2 id="failure">
+<a class="anchor" href="#failure" aria-hidden="true"><span class="octicon octicon-link"></span></a>Failure</h2>
+
+<p>Any exceptions thrown during the course of a #perform are logged and the job is
+scheduled for a retry.</p>
+
+<p>A job can also be failed manually with the
+<a href="https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#fail-instance-method"><code class="language-plaintext highlighter-rouge">Job#fail</code></a>
+method:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SendWelcomeEmailJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="n">params</span> <span class="n">user</span> <span class="p">:</span> <span class="no">User</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="k">if</span> <span class="n">user</span><span class="p">.</span><span class="nf">ready_to_welcome?</span>
+      <span class="n">user</span><span class="p">.</span><span class="nf">send_welcome</span>
+    <span class="k">else</span>
+      <span class="nb">fail</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Retries can also be prevented if desired, See
+<a href="https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#rescheduleable%3F%3ABool-instance-method"><code class="language-plaintext highlighter-rouge">Job#rescheduleable?</code></a></p>
+
+<p>The retry schedule defaults to a geometric back-off. It can be overridden by
+reimplementing the
+<a href="https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#reschedule_interval%28retry_count%3AInt32%29%3ATime%3A%3ASpan-instance-method"><code class="language-plaintext highlighter-rouge">Job#reschedule_interval</code></a>
+method on a Job.</p>
+
+<h2 id="logs">
+<a class="anchor" href="#logs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logs</h2>
+
+<p>Each job provides a <code class="language-plaintext highlighter-rouge">log</code> method which can be used to emit information which
+should be logged as part of a task. Usage is similar to <code class="language-plaintext highlighter-rouge">puts</code>. Mosquito
+prefixes log messages with the job name:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">LogJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="n">log</span> <span class="s2">"ohai background job"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p> </p>
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">2017-11-06 17:07:29 - Mosquito is buzzing...
+2017-11-06 17:07:51 - Running task log_job&lt;...&gt; from log_job
+</span><span class="gi">+2017-11-06 17:07:51 - [LogJob] ohai background job
+</span><span class="p">2017-11-06 17:07:51 - task log_job&lt;...&gt; succeeded, took 0.0 seconds
+</span></code></pre></div></div>
+
+<h1 id="parameters">
+<a class="anchor" href="#parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Parameters</h1>
+
+<p>Job parameters can be declared with the <code class="language-plaintext highlighter-rouge">params</code> macro. Parameters are
+serialized, stored in Redis, and <a href="#primitive-serialization">deserialized</a> before the
+<a href="https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#perform-instance-method"><code class="language-plaintext highlighter-rouge">Job#perform</code></a>
+method is called. A typed constructor is also declared so that enqueuing jobs
+is defended by type safe code.</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SendEmailJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="c1"># Declaring parameters also declares a typed constructor and getter methods</span>
+  <span class="n">params</span><span class="p">(</span><span class="n">email_address</span> <span class="p">:</span> <span class="no">String</span><span class="p">)</span>
+
+  <span class="c1"># These will be generated:</span>
+  <span class="c1"># def email_address : String?; ... end</span>
+  <span class="c1"># def email_address! : String; ... end</span>
+  <span class="c1"># def initialize(@email_address : String); ... end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="default-values">
+<a class="anchor" href="#default-values" aria-hidden="true"><span class="octicon octicon-link"></span></a>Default Values</h2>
+
+<p>Optionally a job parameter can have a default value. The generated constructor
+will take that value as a default as well. Take care to follow the usual
+semantics for default value parameters on a method. Required parameters should
+be first, followed by optional parameters.</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SendEmailJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="n">params</span><span class="p">(</span><span class="n">to</span> <span class="p">:</span> <span class="no">String</span><span class="p">,</span> <span class="n">from</span> <span class="p">:</span> <span class="no">String</span> <span class="o">=</span> <span class="s2">"no-reply@mosquito"</span><span class="p">)</span>
+
+  <span class="c1"># generated code:</span>
+  <span class="c1"># def initialize(@to : String, @from : String = "no-reply@mosquito"); ... end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Parameter values are stored in instance variables of the same name, as with the
+<a href="https://crystal-lang.org/api/0.35.1/Object.html#property(*names,&amp;block)-macro">Object#parameter</a>
+macro.</p>
+
+<h2 id="caveats">
+<a class="anchor" href="#caveats" aria-hidden="true"><span class="octicon octicon-link"></span></a>Caveats</h2>
+
+<p>Be careful when adding parameters to a Job definition when jobs are already
+running in production. Tasks which are stored for later execution in redis will
+fail because the parameters don’t all exist in the serialized task. Consider
+this example:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">RemindUserAboutAbandonedCartJob</code> with params: email_address, last_active_date</li>
+  <li>A user joins, and the task is enqueued</li>
+  <li>new code is deployed, <code class="language-plaintext highlighter-rouge">RemindUserAboutAbandonedCartJob</code> now has params:
+email_address, last_active_date, join_date</li>
+  <li>when the task is popped off the queue, it doesn’t contain a serialized join_date</li>
+</ul>
+
+<h1 id="scheduling-jobs">
+<a class="anchor" href="#scheduling-jobs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Scheduling Jobs</h1>
+
+<p>Delayed job systems often provide the ability to run a job at a specific time.
+Mosquito provides to overloads to <code class="language-plaintext highlighter-rouge">#enqueue</code> which allow job scheduling.</p>
+
+<p>For example:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Enqueue a job after a Time::Span</span>
+<span class="no">PutsJob</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">message: </span><span class="s2">"ohai background job"</span><span class="p">).</span><span class="nf">enqueue</span><span class="p">(</span><span class="ss">in: </span><span class="mi">30</span><span class="p">.</span><span class="nf">seconds</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Enqueue a job at a specific Time</span>
+<span class="no">PutsJob</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">message: </span><span class="s2">"ohai background job"</span><span class="p">).</span><span class="nf">enqueue</span><span class="p">(</span><span class="ss">at: </span><span class="no">Time</span><span class="p">.</span><span class="nf">utc</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>This delayed execution logic is used to implement the <a href="/mosquito-cr/mosquito/wiki/Job-Failures-and-Retries">geometric back-off
+retry</a> flow.</p>
+
+<h2 id="caveats-1">
+<a class="anchor" href="#caveats-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Caveats</h2>
+
+<p>Mosquito is not a precise scheduler. The Mosquito Runner checks to see what
+tasks are overdue at <em>most</em> once every second but there is no guarantee that it
+will happen at <em>least</em> every second. If the worker is bogged down with jobs it
+is possible that a job will not be processed at the specified time.</p>
+
+<p>Scheduled jobs are enqueued with equal priority to other “on demand” jobs at
+the scheduled time. They have equal priority to the worker as other jobs,
+including jobs which have failed and will be retried.</p>
+
+<p>In mosquito, jobs which fail are automatically scheduled for a retry later. The
+default retry algorithm is:</p>
+
+<ul>
+  <li>Retry at most 4 times</li>
+  <li>Delay 2^n seconds between retries, where n is the number of failed executions</li>
+</ul>
+
+<p>Assuming a job that always fails, the retry algorithm produces roughly this
+timeline:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mm:ss
+00:00 - job run #1
+00:02 - job run #2
+00:10 - job run #3
+00:28 - job run #4
+00:50 - job run #5 (no further retry)
+</code></pre></div></div>
+
+<p>As tasks created by this job run, the log output will look something like this:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Running task background_job&lt;...&gt; from background_job
+Failure: task background_job&lt;...&gt; failed, taking no discernible time at all and will run again in 00:00:02
+Found 1 delayed tasks
+Running task background_job&lt;...&gt; from background_job
+Failure: task background_job&lt;...&gt; failed, taking no discernible time at all and will run again in 00:00:08
+Found 1 delayed tasks
+Running task background_job&lt;...&gt; from background_job
+Failure: task background_job&lt;...&gt; failed, taking 9.0ms and will run again in 00:00:18
+Found 1 delayed tasks
+Running task background_job&lt;...&gt; from background_job
+Failure: task background_job&lt;...&gt; failed, taking no discernible time at all and will run again in 00:00:32
+Found 1 delayed tasks
+Running task monitor_job&lt;...&gt; from monitor_job
+Failure: task monitor_job&lt;...&gt; failed, taking no discernible time at all and cannot be rescheduled
+</code></pre></div></div>
+
+<h2 id="per-job-retry-configuration">
+<a class="anchor" href="#per-job-retry-configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Per-job retry configuration</h2>
+
+<p>Job definitions can be configured to <em>never</em> retry failed tasks by adding this
+method to the job definition:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">rescheduleable?</span>
+  <span class="kp">false</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Granular configuration of the retry schedule is not available on a per-job basis.</p>
+
+<h2 id="periodic-jobs-and-retries">
+<a class="anchor" href="#periodic-jobs-and-retries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Periodic jobs and retries</h2>
+
+<p>By default periodic jobs are not retried. Overriding this behavior is not
+recommended. Jobs which perform according to a schedule should be idempotent,
+fail-safe, and simple.</p>
+
+<h1 id="primitive-serialization">
+<a class="anchor" href="#primitive-serialization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Primitive Serialization</h1>
+
+<p>Redis and Mosquito can only store task parameters in string form, but Mosquito
+knows how to serialize and de-serialize many of the Crystal primitives:</p>
+
+<ul>
+  <li>String</li>
+  <li>Bool</li>
+  <li>Char</li>
+  <li>UUID</li>
+  <li>Int (8,16,32,64,128)</li>
+  <li>Uint (8,16,32,64,128)</li>
+  <li>Float (32,64)</li>
+</ul>
+
+  </div>
+</div>
+
+
+    <hr>
+
+    </div>
+    <footer>
+      <p>&copy; 2022</p>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+

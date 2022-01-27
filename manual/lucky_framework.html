@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-type'>
+    <title>Mosquito</title>
+    <link href="/css/main.css" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/images/logo/logomark.svg" type="image/svg+xml">
+    <link rel="alternate" type="application/atom+xml" href="/atom.xml">
+    <meta config="NOFOLLOW,NOINDEX" name="robots">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="header">
+        <h1>
+          <a href="/">
+            <img src="/images/logo/logotype_horizontal.svg" alt="Mosquito" style="display: inline-block; width: 17rem;">
+          </a>
+        </h1>
+        <p>A lightweight background task framework for Crystal applications.</p>
+      </div>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito">Source Code</a> &middot;
+        <a href="https://mosquito-cr.github.io/mosquito/Mosquito.html">Docs</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/wiki">Wiki</a>
+      </nav>
+      <hr>
+
+
+<div class="two-column col-30-70">
+  <div class="column content">
+    <toc>
+      
+      <h1>Table of Contents</h1>
+      <h2><a href="#top">Using Mosquito with Lucky</a></h2>
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#installation">Installation</a></li>
+<li class="toc-entry toc-h1"><a href="#adding-a-job">Adding a Job</a></li>
+<li class="toc-entry toc-h1"><a href="#creatingupdating-records-from-a-worker">Creating/Updating records from a worker</a></li>
+</ul>
+      
+
+      Other pages in the manual:
+
+      
+      <ul>
+      
+        
+          <li><a href="/manual/index.html">Mosquito Manual</a>
+        
+      
+        
+      
+        
+          <li><a href="/manual/rate_limiting.html">Rate Limiting Jobs</a>
+        
+      
+        
+          <li><a href="/manual/serialization.html">Custom Serialization</a>
+        
+      
+      </ul>
+    </toc>
+  </div>
+
+  <div class="column content">
+    <h1>Using Mosquito with Lucky</h1>
+    <p>Using Mosquito with Lucky is simple!</p>
+
+<h1 id="installation">
+<a class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>Adding mosquito to a Lucky project requires adding a line or two each in a few files: shard.yml, shards.cr, and app.cr. It also requires adding a dedicated worker entry-point to your application: app-worker.cr.</p>
+
+<p><strong>shard.yml</strong></p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">targets:
+</span>  server:
+    main: src/start_server.cr
+<span class="gi">+ worker:
++   main: src/app_worker.cr
+</span>
+dependencies:
+  lucky:
+    github: luckyframework/lucky
+<span class="gi">+  mosquito:
++    github: robacarp/mosquito
+</span></code></pre></div></div>
+
+<p><strong>src/shards.cr</strong></p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">require "avram"
+require "lucky"
+require "carbon"
+require "authentic"
+</span><span class="gi">+require "mosquito"
+</span></code></pre></div></div>
+
+<p><strong>src/app.cr</strong></p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">require "./shards"
+</span>
+require "./app_database"
+<span class="p">require "./handlers/**"
+require "./models/base_model"
+require "./models/mixins/**"
+require "./models/**"
+</span><span class="gi">+require "./jobs/**"
+</span><span class="p">require "../config/env"
+require "../config/**"
+require "../db/migrations/**"
+require "./app_server"
+</span></code></pre></div></div>
+
+<p><strong>config/mosquito.cr</strong></p>
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Mosquito</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">settings</span><span class="o">|</span>
+  <span class="n">settings</span><span class="p">.</span><span class="nf">redis_url</span> <span class="o">=</span> <span class="p">(</span><span class="no">ENV</span><span class="p">[</span><span class="s2">"REDIS_URL"</span><span class="p">]?</span> <span class="o">||</span> <span class="s2">"redis://localhost:6379"</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><strong>src/app_worker.cr</strong></p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s2">"./app"</span>
+<span class="nb">require</span> <span class="s2">"mosquito"</span>
+
+<span class="k">if</span> <span class="no">LuckyEnv</span><span class="p">.</span><span class="nf">development?</span>
+  <span class="no">Avram</span><span class="o">::</span><span class="no">Migrator</span><span class="o">::</span><span class="no">Runner</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">ensure_migrated!</span>
+  <span class="no">Avram</span><span class="o">::</span><span class="no">SchemaEnforcer</span><span class="p">.</span><span class="nf">ensure_correct_column_mappings!</span>
+<span class="k">end</span>
+
+<span class="no">Mosquito</span><span class="o">::</span><span class="no">Runner</span><span class="p">.</span><span class="nf">start</span>
+</code></pre></div></div>
+
+<h1 id="adding-a-job">
+<a class="anchor" href="#adding-a-job" aria-hidden="true"><span class="octicon octicon-link"></span></a>Adding a Job</h1>
+
+<p>Place job definitions in src/jobs:</p>
+
+<p><strong>src/jobs/scheduled_puts.cr</strong></p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SchedulerJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">PeriodicJob</span>
+  <span class="n">run_every</span> <span class="mi">1</span><span class="p">.</span><span class="nf">minute</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="nb">puts</span> <span class="s2">"scheduled runner"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="creatingupdating-records-from-a-worker">
+<a class="anchor" href="#creatingupdating-records-from-a-worker" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating/Updating records from a worker</h1>
+
+<p>Lucky spends a <em>lot</em> of energy helping you avoid mistakes in the typical web-request cycle with Operations. The standard paradigm is to tie an Operation to an http-action. The <em>easiest</em> way to save or update models from your worker is to use the bare SaveOperation associated with your model. It’s also possible to create a custom SaveObject which implements validations, etc, and call that from a worker. This example job calls SaveOperation directly.</p>
+
+<p><strong>src/jobs/send_email_job.cr</strong></p>
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SendEmailJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="n">params</span><span class="p">(</span><span class="n">user_id</span> <span class="p">:</span> <span class="no">Int64</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="n">user</span><span class="p">.</span><span class="nf">send_email</span>
+    <span class="n">log</span> <span class="s2">"Sent email to User#</span><span class="si">#{</span><span class="n">user</span><span class="p">.</span><span class="nf">id</span><span class="si">}</span><span class="s2">"</span>
+    
+    <span class="c1"># Call the bare SaveOperation.update generated by an Avram table model</span>
+    <span class="no">User</span><span class="o">::</span><span class="no">SaveOperation</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="ss">email_sent: </span><span class="kp">true</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">operation</span><span class="p">,</span> <span class="n">updated_user</span><span class="o">|</span>
+      <span class="k">if</span> <span class="n">operation</span><span class="p">.</span><span class="nf">saved?</span>
+        <span class="n">log</span> <span class="s2">"Updated User#</span><span class="si">#{</span><span class="n">updated_user</span><span class="p">.</span><span class="nf">id</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">else</span>
+        <span class="c1"># log the failure, providing any error messages</span>
+        <span class="n">log</span> <span class="o">&lt;&lt;-</span><span class="no">LOG</span><span class="sh">
+          Could not update #</span><span class="si">#{</span><span class="n">user</span><span class="p">.</span><span class="nf">id</span><span class="si">}</span><span class="sh">
+          - </span><span class="si">#{</span><span class="n">operation</span><span class="p">.</span><span class="nf">errors</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2"> -"</span><span class="p">)</span><span class="si">}</span><span class="sh">
+</span><span class="no">        LOG</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Provide a lookup method which hard-fails when a parameter fails</span>
+  <span class="c1"># to match a database lookup.</span>
+  <span class="k">def</span> <span class="nf">user</span> <span class="p">:</span> <span class="no">User</span>
+    <span class="vi">@_user</span> <span class="o">||=</span> <span class="no">UserQuery</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">find</span> <span class="n">user_id</span>
+    <span class="vi">@_user</span><span class="p">.</span><span class="nf">not_nil!</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+  </div>
+</div>
+
+
+    <hr>
+
+    </div>
+    <footer>
+      <p>&copy; 2022</p>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+

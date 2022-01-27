@@ -1,0 +1,221 @@
+a { text-decoration: none; color: #07e; }
+
+a:hover { text-decoration: underline; }
+
+a[aria-hidden="true"] { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+body { margin: 0; padding: 0; height: 100%; line-height: 1.2em; background: #fff; font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, Ubuntu, roboto, noto, segoe ui, arial, sans-serif; }
+
+blockquote { border-left: 1px solid #bbb; text-indent: none; }
+
+h1, h2, h3, h4, h5, h6 { font-family: Iowan Old Style, Apple Garamond, Baskerville, Times New Roman, Droid Serif, Times, Source Serif Pro, serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol; line-height: 19.2px; padding: 1.5rem 0; margin-top: 0; }
+
+h1:hover .octicon-link:before, h2:hover .octicon-link:before, h3:hover .octicon-link:before, h4:hover .octicon-link:before, h5:hover .octicon-link:before, h6:hover .octicon-link:before { color: #07e; }
+
+h1 .octicon-link:before, h2 .octicon-link:before, h3 .octicon-link:before, h4 .octicon-link:before, h5 .octicon-link:before, h6 .octicon-link:before { color: rgba(0, 0, 0, 0); content: "#"; }
+
+h1 { font-size: 2rem; }
+
+h2 { font-size: 1.5rem; }
+
+h3 { font-size: 1.45rem; }
+
+h4 { font-size: 1.4rem; }
+
+h5 { font-size: 1.35rem; }
+
+h6 { font-size: 1.2rem; }
+
+hr { border: 0 0 0 1px dotted black; }
+
+table { width: 100%; border-collapse: collapse; }
+
+table tr { border-bottom: 1px solid #000; margin: 0; padding: 0; }
+
+table tr .odd { background-color: #ddd; }
+
+table tr .even { background-color: #eee; }
+
+table tr td { margin: 0; padding: 3px; border-left: 1px solid #aaa; }
+
+.content { text-align: left; padding: 1em 1em; }
+
+footer { bottom: 0; margin-top: 1.5em; margin-bottom: 4em; width: 100%; text-align: center; }
+
+#header { font-family: Iowan Old Style, Apple Garamond, Baskerville, Times New Roman, Droid Serif, Times, Source Serif Pro, serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol; line-height: 1em; text-align: center; padding-top: 8px; }
+
+#header a { text-decoration: none; color: #000; display: block; }
+
+#header h1 { display: flex; margin: 0 auto; justify-content: center; align-items: center; gap: 1rem; }
+
+nav { text-align: center; display: block; }
+
+nav a { text-decoration: none; }
+
+toc h1 { text-decoration: underline; margin: 1rem 0 2rem; padding: 0; }
+
+toc h2 { margin: 1rem; padding: 0; }
+
+toc a { text-decoration: none; color: #000; display: block; padding: 0.2rem 0 0; }
+
+#wrap { margin: 0 auto; max-width: 1280px; }
+
+.two-column { display: flex; flex-direction: column; gap: 1em; }
+
+.two-column .column { width: 93%; }
+
+@media screen and (min-width: 640px) { toc { position: sticky; top: 1em; } .two-column { flex-direction: row; } .two-column .column { width: 50%; } .two-column.col-30-70 .column:first-child { width: 30%; } .two-column.col-30-70 .column { width: 70%; } }
+
+.highlight { /* Comment */ /* Error */ /* Generic */ /* Keyword */ /* Literal */ /* Name */ /* Operator */ /* Other */ /* Punctuation */ /* Comment.Multiline */ /* Comment.Preproc */ /* Comment.Single */ /* Comment.Special */ /* Generic.Deleted */ /* Generic.Emph */ /* Generic.Error */ /* Generic.Heading */ /* Generic.Inserted */ /* Generic.Output */ /* Generic.Prompt */ /* Generic.Strong */ /* Generic.Subheading */ /* Generic.Traceback */ /* Keyword.Constant */ /* Keyword.Declaration */ /* Keyword.Namespace */ /* Keyword.Pseudo */ /* Keyword.Reserved */ /* Keyword.Type */ /* Literal.Date */ /* Literal.Number */ /* Literal.String */ /* Name.Attribute */ /* Name.Builtin */ /* Name.Class */ /* Name.Constant */ /* Name.Decorator */ /* Name.Entity */ /* Name.Exception */ /* Name.Function */ /* Name.Label */ /* Name.Namespace */ /* Name.Other */ /* Name.Property */ /* Name.Tag */ /* Name.Variable */ /* Operator.Word */ /* Text.Whitespace */ /* Literal.Number.Float */ /* Literal.Number.Hex */ /* Literal.Number.Integer */ /* Literal.Number.Oct */ /* Literal.String.Backtick */ /* Literal.String.Char */ /* Literal.String.Doc */ /* Literal.String.Double */ /* Literal.String.Escape */ /* Literal.String.Heredoc */ /* Literal.String.Interpol */ /* Literal.String.Other */ /* Literal.String.Regex */ /* Literal.String.Single */ /* Literal.String.Symbol */ /* Name.Builtin.Pseudo */ /* Name.Variable.Class */ /* Name.Variable.Global */ /* Name.Variable.Instance */ /* Literal.Number.Integer.Long */ }
+
+.highlight pre { color: #ddd; margin: 0; background-color: #404040; }
+
+.highlight > pre { padding-left: 10px; }
+
+.highlight .linenos { color: #bbb; }
+
+.highlight table { width: auto; border-collapse: unset; }
+
+.highlight table td { padding: 0; border-width: 0; }
+
+.highlight table td.code { border-left: 1px solid #bbb; padding-left: 0.8em; }
+
+.highlight .hll { background-color: #404040; }
+
+.highlight .c { color: #999999; font-style: italic; }
+
+.highlight .err { color: #a61717; background-color: #e3d2d2; }
+
+.highlight .g { color: #d0d0d0; }
+
+.highlight .k { color: #6ab825; font-weight: bold; }
+
+.highlight .l { color: #d0d0d0; }
+
+.highlight .n { color: #d0d0d0; }
+
+.highlight .o { color: #d0d0d0; }
+
+.highlight .x { color: #d0d0d0; }
+
+.highlight .p { color: #d0d0d0; }
+
+.highlight .cm { color: #999999; font-style: italic; }
+
+.highlight .cp { color: #cd2828; font-weight: bold; }
+
+.highlight .c1 { color: #999999; font-style: italic; }
+
+.highlight .cs { color: #e50808; font-weight: bold; background-color: #520000; }
+
+.highlight .gd { color: #d22323; }
+
+.highlight .ge { color: #d0d0d0; font-style: italic; }
+
+.highlight .gr { color: #d22323; }
+
+.highlight .gh { color: #ffffff; font-weight: bold; }
+
+.highlight .gi { color: #589819; }
+
+.highlight .go { color: #cccccc; }
+
+.highlight .gp { color: #aaaaaa; }
+
+.highlight .gs { color: #d0d0d0; font-weight: bold; }
+
+.highlight .gu { color: #ffffff; text-decoration: underline; }
+
+.highlight .gt { color: #d22323; }
+
+.highlight .kc { color: #6ab825; font-weight: bold; }
+
+.highlight .kd { color: #6ab825; font-weight: bold; }
+
+.highlight .kn { color: #6ab825; font-weight: bold; }
+
+.highlight .kp { color: #6ab825; }
+
+.highlight .kr { color: #6ab825; font-weight: bold; }
+
+.highlight .kt { color: #6ab825; font-weight: bold; }
+
+.highlight .ld { color: #d0d0d0; }
+
+.highlight .m { color: #3677a9; }
+
+.highlight .s { color: #ed9d13; }
+
+.highlight .na { color: #bbbbbb; }
+
+.highlight .nb { color: #24909d; }
+
+.highlight .nc { color: #447fcf; text-decoration: underline; }
+
+.highlight .no { color: #40ffff; }
+
+.highlight .nd { color: #ffa500; }
+
+.highlight .ni { color: #d0d0d0; }
+
+.highlight .ne { color: #bbbbbb; }
+
+.highlight .nf { color: #447fcf; }
+
+.highlight .nl { color: #d0d0d0; }
+
+.highlight .nn { color: #447fcf; text-decoration: underline; }
+
+.highlight .nx { color: #d0d0d0; }
+
+.highlight .py { color: #d0d0d0; }
+
+.highlight .nt { color: #6ab825; font-weight: bold; }
+
+.highlight .nv { color: #40ffff; }
+
+.highlight .ow { color: #6ab825; font-weight: bold; }
+
+.highlight .w { color: #666666; }
+
+.highlight .mf { color: #3677a9; }
+
+.highlight .mh { color: #3677a9; }
+
+.highlight .mi { color: #3677a9; }
+
+.highlight .mo { color: #3677a9; }
+
+.highlight .sb { color: #ed9d13; }
+
+.highlight .sc { color: #ed9d13; }
+
+.highlight .sd { color: #ed9d13; }
+
+.highlight .s2 { color: #ed9d13; }
+
+.highlight .se { color: #ed9d13; }
+
+.highlight .sh { color: #ed9d13; }
+
+.highlight .si { color: #ed9d13; }
+
+.highlight .sx { color: #ffa500; }
+
+.highlight .sr { color: #ed9d13; }
+
+.highlight .s1 { color: #ed9d13; }
+
+.highlight .ss { color: #ed9d13; }
+
+.highlight .bp { color: #24909d; }
+
+.highlight .vc { color: #40ffff; }
+
+.highlight .vg { color: #40ffff; }
+
+.highlight .vi { color: #40ffff; }
+
+.highlight .il { color: #3677a9; }
+
+/*# sourceMappingURL=main.css.map */

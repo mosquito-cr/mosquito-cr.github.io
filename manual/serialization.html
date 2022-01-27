@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-type'>
+    <title>Mosquito</title>
+    <link href="/css/main.css" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/images/logo/logomark.svg" type="image/svg+xml">
+    <link rel="alternate" type="application/atom+xml" href="/atom.xml">
+    <meta config="NOFOLLOW,NOINDEX" name="robots">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="header">
+        <h1>
+          <a href="/">
+            <img src="/images/logo/logotype_horizontal.svg" alt="Mosquito" style="display: inline-block; width: 17rem;">
+          </a>
+        </h1>
+        <p>A lightweight background task framework for Crystal applications.</p>
+      </div>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito">Source Code</a> &middot;
+        <a href="https://mosquito-cr.github.io/mosquito/Mosquito.html">Docs</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/wiki">Wiki</a>
+      </nav>
+      <hr>
+
+
+<div class="two-column col-30-70">
+  <div class="column content">
+    <toc>
+      
+
+      Other pages in the manual:
+
+      
+      <ul>
+      
+        
+          <li><a href="/manual/index.html">Mosquito Manual</a>
+        
+      
+        
+          <li><a href="/manual/lucky_framework.html">Using Mosquito with Lucky</a>
+        
+      
+        
+          <li><a href="/manual/rate_limiting.html">Rate Limiting Jobs</a>
+        
+      
+        
+      
+      </ul>
+    </toc>
+  </div>
+
+  <div class="column content">
+    <h1>Custom Serialization</h1>
+    <p>In order to teach Mosquito how to serialize and de-serialize custom classes, define a method pair which handles the transformations and include it in the Job definition.</p>
+
+<p><strong>This functionality should be avoided.</strong> Instead, simply handle (de)serialization on your own.</p>
+
+<p>An example:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SpecialtyObject</span>
+  <span class="kp">property</span> <span class="nb">name</span> <span class="p">:</span> <span class="no">String</span>
+  <span class="kp">property</span> <span class="n">value</span> <span class="p">:</span> <span class="no">Int32</span>
+
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="vi">@name</span><span class="p">,</span> <span class="vi">@value</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">module</span> <span class="nn">SpecialtyObjectMosquitoSerializer</span>
+  <span class="k">def</span> <span class="nf">serialize_specialty_object</span><span class="p">(</span><span class="n">specialty</span> <span class="p">:</span> <span class="no">SpecialtyObject</span><span class="p">)</span> <span class="p">:</span> <span class="no">String</span>
+    <span class="s2">"</span><span class="si">#{</span><span class="n">specialty</span><span class="p">.</span><span class="nf">name</span><span class="si">}</span><span class="s2">=</span><span class="si">#{</span><span class="n">specialty</span><span class="p">.</span><span class="nf">value</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">deserialize_specialty_object</span><span class="p">(</span><span class="n">raw</span> <span class="p">:</span> <span class="no">String</span><span class="p">)</span> <span class="p">:</span> <span class="no">SpecialtyObject</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">raw</span><span class="p">.</span><span class="nf">split</span> <span class="s2">"="</span>
+    <span class="no">SpecialtyObject</span><span class="p">.</span><span class="nf">new</span> <span class="ss">name: </span><span class="n">parts</span><span class="p">.</span><span class="nf">first</span><span class="p">,</span> <span class="ss">value: </span><span class="n">parts</span><span class="p">.</span><span class="nf">last</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">MyJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="kp">include</span> <span class="no">SpecialtyObjectMosquitoSerializer</span>
+
+  <span class="n">params</span> <span class="n">specialty_object</span> <span class="p">:</span> <span class="no">SpecialtyObject</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="c1"># ...</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+  </div>
+</div>
+
+
+    <hr>
+
+    </div>
+    <footer>
+      <p>&copy; 2022</p>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+

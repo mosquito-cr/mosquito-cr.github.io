@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-type'>
+    <title>Mosquito</title>
+    <link href="/css/main.css" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/images/logo/logomark.svg" type="image/svg+xml">
+    <link rel="alternate" type="application/atom+xml" href="/atom.xml">
+    <meta config="NOFOLLOW,NOINDEX" name="robots">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="header">
+        <h1>
+          <a href="/">
+            <img src="/images/logo/logotype_horizontal.svg" alt="Mosquito" style="display: inline-block; width: 17rem;">
+          </a>
+        </h1>
+        <p>A lightweight background task framework for Crystal applications.</p>
+      </div>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito">Source Code</a> &middot;
+        <a href="https://mosquito-cr.github.io/mosquito/Mosquito.html">Docs</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/wiki">Wiki</a>
+      </nav>
+      <hr>
+
+
+<div class="two-column">
+  <div class="column content" style="text-align: center">
+    <img src="/images/amber-mosquito.png" style="width: 60%; margin-top: 2em;">
+  </div>
+
+  <div class="column content">
+    <h2 id="installation">Installation</h2>
+
+<p>Update your shard.yml to include mosquito, and run <code class="language-plaintext highlighter-rouge">shards install</code>:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">targets:
+</span>  app:
+    main: src/my_app.cr
+<span class="gi">+ worker:
++   main: src/worker.cr
+</span>
+dependencies:
+<span class="gi">+  mosquito:
++    github: mosquito-cr/mosquito
+</span></code></pre></div></div>
+
+<h2 id="usage">Usage</h2>
+
+<h3 id="step-1-configure-mosquito-in-your-app">Step 1: Configure mosquito in your app:</h3>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/worker.cr</span>
+<span class="nb">require</span> <span class="s2">"mosquito"</span>
+
+<span class="no">Mosquito</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">settings</span><span class="o">|</span>
+  <span class="n">settings</span><span class="p">.</span><span class="nf">redis_url</span> <span class="o">=</span> <span class="no">ENV</span><span class="p">[</span><span class="s2">"REDIS_URL"</span><span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p> </p>
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># src/worker.cr</span>
+<span class="nb">require</span> <span class="s2">"../config/worker.cr"</span>
+
+<span class="no">Mosquito</span><span class="o">::</span><span class="no">Runner</span><span class="p">.</span><span class="nf">start</span>
+</code></pre></div></div>
+
+<h3 id="step-2-build-your-job">Step 2: Build your job:</h3>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># src/jobs/puts_job.cr</span>
+<span class="k">class</span> <span class="nc">PutsJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="n">params</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="nb">puts</span> <span class="n">message</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="step-3-queue-your-job">Step 3: Queue your job:</h3>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">PutsJob</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">message: </span><span class="s2">"hello world"</span><span class="p">).</span><span class="nf">enqueue</span>
+</code></pre></div></div>
+
+<h3 id="step-4-run-your-worker-to-process-the-job">Step 4: Run your worker to process the job</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>crystal run src/worker.cr
+</code></pre></div></div>
+
+<h3 id="success">Success!</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; crystal run src/worker.cr
+2017-11-06 17:07:29 - Mosquito is buzzing...
+2017-11-06 17:07:51 - Running task puts_job&lt;...&gt; from puts_job
+2017-11-06 17:07:51 - [PutsJob] hello world
+2017-11-06 17:07:51 - task puts_job&lt;...&gt; succeeded, took 0.0 seconds
+</code></pre></div></div>
+
+  </div>
+</div>
+
+    <hr>
+
+    </div>
+    <footer>
+      <p>&copy; 2022</p>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+

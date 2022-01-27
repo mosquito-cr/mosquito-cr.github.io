@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-type'>
+    <title>Mosquito</title>
+    <link href="/css/main.css" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/images/logo/logomark.svg" type="image/svg+xml">
+    <link rel="alternate" type="application/atom+xml" href="/atom.xml">
+    <meta config="NOFOLLOW,NOINDEX" name="robots">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="header">
+        <h1>
+          <a href="/">
+            <img src="/images/logo/logotype_horizontal.svg" alt="Mosquito" style="display: inline-block; width: 17rem;">
+          </a>
+        </h1>
+        <p>A lightweight background task framework for Crystal applications.</p>
+      </div>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito">Source Code</a> &middot;
+        <a href="https://mosquito-cr.github.io/mosquito/Mosquito.html">Docs</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/wiki">Wiki</a>
+      </nav>
+      <hr>
+
+
+<div class="two-column col-30-70">
+  <div class="column content">
+    <toc>
+      
+
+      Other pages in the manual:
+
+      
+      <ul>
+      
+        
+          <li><a href="/manual/index.html">Mosquito Manual</a>
+        
+      
+        
+          <li><a href="/manual/lucky_framework.html">Using Mosquito with Lucky</a>
+        
+      
+        
+      
+        
+          <li><a href="/manual/serialization.html">Custom Serialization</a>
+        
+      
+      </ul>
+    </toc>
+  </div>
+
+  <div class="column content">
+    <h1>Rate Limiting Jobs</h1>
+    <p>Optionally, Jobs can be rate limited to limit the number of tasks that get executed within a given period of time.</p>
+
+<p>For example, if 10 messages were enqueued for ThrottledJob at one time; 5 would be executed immediately, then pause for a minute, then execute the next 5.</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ThrottledJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="kp">include</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">RateLimiter</span>
+
+  <span class="n">params</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
+  <span class="n">throttle</span> <span class="ss">limit: </span><span class="mi">5</span><span class="p">,</span> <span class="ss">per: </span><span class="mi">1</span><span class="p">.</span><span class="nf">minute</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="nb">puts</span> <span class="n">message</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+  </div>
+</div>
+
+
+    <hr>
+
+    </div>
+    <footer>
+      <p>&copy; 2022</p>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+
