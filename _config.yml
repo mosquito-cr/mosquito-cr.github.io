@@ -6,14 +6,13 @@ markdown: kramdown
 exclude:
  - Gemfile
  - Gemfile.lock
- - vendor
- - scripts
- - config.ru
- - Procfile
- - nginx
- - Dockerfile
- - prod-config-generator.rb
 
 include:
-  - .well-known
   - robots.txt
+
+collections:
+  manual:
+    output: true
+
+plugins:
+  - jekyll-toc

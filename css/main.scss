@@ -14,6 +14,12 @@ a {
   &:hover {
     text-decoration: underline;
   }
+  &[aria-hidden="true"] {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
 }
 
 
@@ -34,22 +40,31 @@ blockquote {
 
 h1,h2,h3,h4,h5,h6 {
   font-family: $serif-fonts;
+  line-height: 19.2px;
+  padding: 1.5rem 0;
+  margin-top: 0;
+
+  &:hover {
+    .octicon-link:before {
+      color: #07e;
+    }
+  }
+
+  .octicon-link:before {
+    color: rgba(0,0,0,0);
+    content: "#";
+  }
 }
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.45rem; }
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.35rem; }
+h6 { font-size: 1.2rem; }
 
 hr {
   border: 0 0 0 1px dotted black;
-}
-
-img.left {
-  float: left;
-  margin-right: 1em;
-  border: 1px solid #000;
-}
-
-img.right {
-  float: right;
-  margin-left: 1em;
-  border: 1px solid #000;
 }
 
 table {
@@ -76,20 +91,14 @@ table {
 }
 
 .content {
-  text-align: justify;
+  text-align: left;
   padding: 1em 1em;
-
-  p {
-    margin-left: 0.5em;
-  }
-  p.noindent {
-    text-indent: 0;
-  }
 }
 
-#footer {
+footer {
   bottom: 0;
-  padding-top: 1.5em;
+  margin-top: 1.5em;
+  margin-bottom: 4em;
   width: 100%;
   text-align: center;
 }
@@ -107,7 +116,7 @@ table {
   }
 
   h1 {
-      display: flex;
+    display: flex;
     margin: 0 auto;
     justify-content: center;
     align-items: center;
@@ -115,7 +124,7 @@ table {
   }
 }
 
-#nav {
+nav {
   text-align: center;
   display: block;
 
@@ -124,26 +133,62 @@ table {
   }
 }
 
+toc {
+  h1 {
+    text-decoration: underline;
+    margin: 1rem 0 2rem;
+    padding: 0;
+  }
+
+  h2 {
+    margin: 1rem;
+    padding: 0;
+  }
+
+  a {
+    text-decoration: none;
+    color: #000;
+    display: block;
+    padding: 0.2rem 0 0;
+  }
+}
+
 #wrap {
-  margin: 0 auto 4em;
+  margin: 0 auto;
   max-width: 1280px;
 }
 
 .two-column {
   display: flex;
+  flex-direction: column;
   gap: 1em;
 
   .column {
-    width: 50%;
+    width: 93%;
   }
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (min-width: 640px) {
+  toc {
+    position: sticky;
+    top: 1em;
+  }
+
   .two-column {
-    flex-direction: column;
+    flex-direction: row;
 
     .column {
-      width: 93%;
+      width: 50%;
+    }
+
+    &.col-30-70 {
+      .column:first-child {
+        width: 30%;
+      }
+
+      .column {
+        width: 70%;
+      }
     }
   }
 }

@@ -1,0 +1,35 @@
+---
+---
+
+{% include header.html %}
+
+<div class="two-column col-30-70">
+  <div class="column content">
+    <toc>
+      {% if page.toc %}
+      <h1>Table of Contents</h1>
+      <h2><a href="#top">{{ page.title }}</a></h2>
+      {{ content | toc_only }}
+      {% endif %}
+
+      Other pages in the manual:
+
+      {% assign manual_collection = site.collections | where: "label", "manual" | first %}
+      <ul>
+      {% for man_page in manual_collection.docs %}
+        {% if page <> man_page %}
+          <li><a href="{{ man_page.url }}">{{ man_page.title }}</a>
+        {% endif %}
+      {% endfor %}
+      </ul>
+    </toc>
+  </div>
+
+  <div class="column content">
+    <h1>{{ page.title }}</h1>
+    {{ content | inject_anchors }}
+  </div>
+</div>
+
+
+{% include footer.html %}
