@@ -5,7 +5,7 @@
 
 <div class="two-column col-30-70">
   <div class="column content">
-    <toc>
+    <div id=toc>
       {% if page.toc %}
       <h1>Table of Contents</h1>
       <h2><a href="#top">{{ page.title }}</a></h2>
@@ -22,7 +22,7 @@
         {% endif %}
       {% endfor %}
       </ul>
-    </toc>
+    </div>
   </div>
 
   <div class="column content">

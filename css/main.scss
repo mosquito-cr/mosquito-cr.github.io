@@ -57,11 +57,11 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 h1 { font-size: 2rem; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.45rem; }
-h4 { font-size: 1.4rem; }
-h5 { font-size: 1.35rem; }
-h6 { font-size: 1.2rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.2rem; }
+h5 { font-size: 1.1rem; }
+h6 { font-size: 1.0rem; }
 
 hr {
   border: 0 0 0 1px dotted black;
@@ -133,7 +133,7 @@ nav {
   }
 }
 
-toc {
+div#toc {
   h1 {
     text-decoration: underline;
     margin: 1rem 0 2rem;
@@ -151,6 +151,8 @@ toc {
     display: block;
     padding: 0.2rem 0 0;
   }
+
+  overflow: auto;
 }
 
 #wrap {
@@ -169,7 +171,7 @@ toc {
 }
 
 @media screen and (min-width: 640px) {
-  toc {
+  div#toc {
     position: sticky;
     top: 1em;
   }
