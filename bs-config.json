@@ -1,0 +1,15 @@
+{
+  "ui": false,
+  "files": "_site/**/*",
+  "watchEvents": ["add", "change", "unlink"],
+  "watch": true,
+  "proxy": "http://localhost:3999",
+  "port": 4000,
+  "open": false,
+  "reloadOnRestart": true,
+  "notify": false,
+  "reloadDebounce": 500,
+  "minify": false,
+  "localOnly": true,
+  "timestamps": false
+}

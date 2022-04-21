@@ -7,6 +7,8 @@ exclude:
  - Gemfile
  - Gemfile.lock
 
+port: 3999
+
 include:
   - robots.txt
 
@@ -16,3 +18,20 @@ collections:
 
 plugins:
   - jekyll-toc
+
+exclude:
+  - .git
+  - .github
+  - .gitignore
+  - .jekyll-cache/
+  - .sass-cache/
+  - .tool-versions
+  - Gemfile
+  - Gemfile.lock
+  - Procfile
+  - gemfiles/
+  - node_modules/
+  - package.json
+  - postcss.config.js
+  - tailwind.config.js
+  - yarn.lock
