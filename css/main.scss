@@ -171,11 +171,6 @@ div#toc {
 }
 
 @media screen and (min-width: 640px) {
-  div#toc {
-    position: sticky;
-    top: 1em;
-  }
-
   .two-column {
     flex-direction: row;
 
