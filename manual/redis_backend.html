@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-type'>
+    <title>Mosquito</title>
+    <link href="/css/main.css" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/images/logo/logomark.svg" type="image/svg+xml">
+    <link rel="alternate" type="application/atom+xml" href="/atom.xml">
+    <meta config="NOFOLLOW,NOINDEX" name="robots">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="header">
+        <h1>
+          <a href="/">
+            <img src="/images/logo/logotype_horizontal.svg" alt="Mosquito" style="display: inline-block; width: 17rem;">
+          </a>
+        </h1>
+        <p>A lightweight background task framework for Crystal applications.</p>
+      </div>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito">Source Code</a> &middot;
+        <a href="https://mosquito-cr.github.io/mosquito/Mosquito.html">Docs</a> &middot;
+        <a href="/manual/index.html#installation">Getting Started</a> &middot;
+        <a href="/manual/index.html">Manual</a>
+      </nav>
+      <hr>
+
+
+<div class="two-column col-30-70">
+  <div class="column content">
+    <div id=toc>
+      
+      <h1>Table of Contents</h1>
+      <h2><a href="#top">Redis Storage and Queuing Model</a></h2>
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h3"><a href="#hash-like-metadata">Hash-like Metadata</a></li>
+<li class="toc-entry toc-h3"><a href="#queuing-data">Queuing Data</a></li>
+<li class="toc-entry toc-h2"><a href="#queuing-model">Queuing Model</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#delayed-execution">Delayed Execution</a></li>
+<li class="toc-entry toc-h3"><a href="#periodic-execution">Periodic Execution</a></li>
+<li class="toc-entry toc-h3"><a href="#failed-job-re-execution">Failed Job Re-Execution</a></li>
+</ul>
+</li>
+</ul>
+      
+
+      Other pages in the manual:
+
+      
+      <ul>
+      
+        
+          <li><a href="/manual/index.html">Mosquito Manual</a>
+        
+      
+        
+          <li><a href="/manual/lucky_framework.html">Using Mosquito with Lucky</a>
+        
+      
+        
+          <li><a href="/manual/rate_limiting.html">Rate Limiting Jobs</a>
+        
+      
+        
+      
+        
+          <li><a href="/manual/serialization.html">Custom Serialization</a>
+        
+      
+      </ul>
+    </div>
+  </div>
+
+  <div class="column content">
+    <h1>Redis Storage and Queuing Model</h1>
+    <p>Mosquito’s default (currently: only) backend is Redis. The redis data model leverages as much atomicity as possible from redis primitives to decrease the risk of double-run errors, lost jobs, etc.</p>
+
+<p>There are two general storage mechanisms at play: hash-like metadata and queuing data.</p>
+
+<h3 id="hash-like-metadata">
+<a class="anchor" href="#hash-like-metadata" aria-hidden="true"><span class="octicon octicon-link"></span></a>Hash-like Metadata</h3>
+
+<p>Both Jobs and Tasks are able to refer to hash-like metadata. A Task’s metadata contains several fields specific to a single job run, and a Job’s metadata allows storage of metadata about all job-runs for a Job.</p>
+
+<p>Task metadata stores the parameter values a job run is enqueued with, and it also stores several internal metadata attributes needed for tracking and running the Job corretly:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">id</code> - String, a unique identifier for this job.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">type</code> - String representation of the Job class, eg <code class="language-plaintext highlighter-rouge">"SendWelcomeEmailJob"</code>
+</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">enqueue_time</code> - <a href="crystal-lang.org/api/latest/Time.html"><code class="language-plaintext highlighter-rouge">Time</code></a> representing the first time this task was enqueued.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">retry_count</code> - Integer, the number of times the job has been tried and failed.</li>
+</ul>
+
+<p>These values are stored in a <a href="https://redis.io/docs/manual/data-types/#hashes">Hash</a>. The Redis key for the hash is the unique task <code class="language-plaintext highlighter-rouge">id</code>.</p>
+
+<h3 id="queuing-data">
+<a class="anchor" href="#queuing-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Queuing Data</h3>
+
+<p>A named Mosquito <a href="https://mosquito-cr.github.io/mosquito/Mosquito/Queue.html"><code class="language-plaintext highlighter-rouge">Queue</code></a> is represented by 4 <a href="https://redis.io/docs/manual/data-types/#sorted-sets">Sorted Sets</a>:</p>
+
+<ul>
+  <li>Waiting - holds a list of jobs which need to be executed as soon as possible.</li>
+  <li>Pending - holds a list of job runs wich are currently being executed by a runner.</li>
+  <li>Scheduled - indexed by next execution time, and holds job runs which are planned for a later time.</li>
+  <li>Dead - for job runs which have failed and are no longer able to be retried with the current configuration.</li>
+</ul>
+
+<p>Each of these named sub-queues holds nothing more than a list of Task IDs.</p>
+
+<h2 id="queuing-model">
+<a class="anchor" href="#queuing-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Queuing Model</h2>
+
+<p>In a typical use case a job is enqueued for immediate execution. When <code class="language-plaintext highlighter-rouge">ExampleJob.new(param: "value").enqueue</code> is called two actions take place:</p>
+
+<ol>
+  <li>The Task is built, and the parameter value and task metadata is stored in a redis hash.</li>
+  <li>The Task id is pushed onto the end of the <code class="language-plaintext highlighter-rouge">waiting</code> sorted set.</li>
+</ol>
+
+<p>When a worker begins processing the job:</p>
+
+<ol>
+  <li>The Task id is atomically moved from the <code class="language-plaintext highlighter-rouge">waiting</code> set to the <code class="language-plaintext highlighter-rouge">pending</code> set.</li>
+  <li>The metadata and parameter hash is pulled from the hash storage.</li>
+  <li>A matching Job class is initialized and the <code class="language-plaintext highlighter-rouge">#run</code> method is called.</li>
+</ol>
+
+<p>When the worker finishes the job successfully:</p>
+
+<ol>
+  <li>The Task id is removed from the <code class="language-plaintext highlighter-rouge">pending</code> set.</li>
+  <li>The metadata and parameter hash is set to expire.</li>
+</ol>
+
+<p>Slight variants exist on the queuing model for the following circumstances:</p>
+
+<ol>
+  <li>The job should not be executed right away, e.g. <code class="language-plaintext highlighter-rouge">ExampleJob.new.enqueue in: 3.minutes</code>.</li>
+  <li>The job is <a href="/manual/index.html#periodic-jobs">Periodic</a>.</li>
+  <li>The job fails for some reason.</li>
+</ol>
+
+<h3 id="delayed-execution">
+<a class="anchor" href="#delayed-execution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Delayed Execution</h3>
+
+<p>When a job should not be attempted for some time, it is not added to the <code class="language-plaintext highlighter-rouge">waiting</code> set. Instead it is inserted to the <code class="language-plaintext highlighter-rouge">scheduled</code> sorted set. For this insertion the sort key is the desired execution time.</p>
+
+<p>Periodically a runner will ask the backend for <code class="language-plaintext highlighter-rouge">scheduled</code> jobs whose scheduled time has come. Overdue task IDs are removed from the <code class="language-plaintext highlighter-rouge">scheduled</code> set and pushed onto the <code class="language-plaintext highlighter-rouge">waiting</code> set. Execution then proceeds as if the job were enqueued normally.</p>
+
+<h3 id="periodic-execution">
+<a class="anchor" href="#periodic-execution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Periodic Execution</h3>
+
+<p>When a job is to be attempted on an interval, it is not added to the <code class="language-plaintext highlighter-rouge">waiting</code> set.</p>
+
+<p>Periodically a runner will check all known subclasses of <code class="language-plaintext highlighter-rouge">PeriodicJob</code> and attempt to run each. If the specific wait time has passed or the job has never been executed a task is generated and added to the <code class="language-plaintext highlighter-rouge">waiting</code> set. Execution then proceeds as if the job were enqueued normally.</p>
+
+<h3 id="failed-job-re-execution">
+<a class="anchor" href="#failed-job-re-execution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Failed Job Re-Execution</h3>
+
+<p>When a job is attempted and fails for some reason it is scheduled for retry at a later time, putting the task id on the <code class="language-plaintext highlighter-rouge">scheduled</code> sorted set. Each successive failure will result in a longer delay until the next execution (geometric backoff). After a configurable number of failures, the task id will be considerd unsalvageable and placed on the <code class="language-plaintext highlighter-rouge">dead</code> set with an expiration.</p>
+
+  </div>
+</div>
+
+
+    <hr>
+
+    </div>
+    <footer>
+      <p>&copy; 2022</p>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+
