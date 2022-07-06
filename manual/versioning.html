@@ -32,6 +32,13 @@
   <div class="column content">
     <div id=toc>
       
+      <h1>Table of Contents</h1>
+      <h2><a href="#top">Versioning</a></h2>
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#semver">SemVer</a></li>
+<li class="toc-entry toc-h2"><a href="#release-candidates">Release Candidates</a></li>
+</ul>
+      
 
       Other pages in the manual:
 
@@ -47,6 +54,8 @@
         
       
         
+          <li><a href="/manual/rate_limiting.html">Rate Limiting Jobs</a>
+        
       
         
           <li><a href="/manual/redis_backend.html">Redis Storage and Queuing Model</a>
@@ -57,30 +66,30 @@
         
       
         
-          <li><a href="/manual/versioning.html">Versioning</a>
-        
       
       </ul>
     </div>
   </div>
 
   <div class="column content">
-    <h1>Rate Limiting Jobs</h1>
-    <p>Optionally, Jobs can be rate limited to limit the number of tasks that get executed within a given period of time.</p>
+    <h1>Versioning</h1>
+    <h2 id="semver">
+<a class="anchor" href="#semver" aria-hidden="true"><span class="octicon octicon-link"></span></a>SemVer</h2>
 
-<p>For example, if 10 messages were enqueued for ThrottledJob at one time; 5 would be executed immediately, then pause for a minute, then execute the next 5.</p>
+<p>Mosquito strictly follows <a href="https://semver.org/">SemVer</a> versioning. This means that you can trust the API is stable within a major version. Any API drift within a major version is unintentional and can be considered a bug.</p>
 
-<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ThrottledJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
-  <span class="kp">include</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">RateLimiter</span>
+<h2 id="release-candidates">
+<a class="anchor" href="#release-candidates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Release Candidates</h2>
 
-  <span class="n">params</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
-  <span class="n">throttle</span> <span class="ss">limit: </span><span class="mi">5</span><span class="p">,</span> <span class="ss">per: </span><span class="mi">1</span><span class="p">.</span><span class="nf">minute</span>
+<p>A release candidate will be tagged following the form <code class="language-plaintext highlighter-rouge">v1.0.0rc1</code> where the version that will be released is <code class="language-plaintext highlighter-rouge">1.0.0</code> and the candidate revision is <code class="language-plaintext highlighter-rouge">1</code>.</p>
 
-  <span class="k">def</span> <span class="nf">perform</span>
-    <span class="nb">puts</span> <span class="n">message</span>
-  <span class="k">end</span>
-<span class="k">end</span>
-</code></pre></div></div>
+<p>Release candidates can be installed with this modified shard.yml stanza:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">dependencies:
+</span><span class="gi">+  mosquito:
++    github: mosquito-cr/mosquito
++    version: "1.0.0.rc1" # no leading v
+</span></code></pre></div></div>
 
   </div>
 </div>
