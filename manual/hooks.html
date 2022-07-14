@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-type'>
+    <title>Mosquito</title>
+    <link href="/css/main.css" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/images/logo/logomark.svg" type="image/svg+xml">
+    <link rel="alternate" type="application/atom+xml" href="/atom.xml">
+    <meta config="NOFOLLOW,NOINDEX" name="robots">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="header">
+        <h1>
+          <a href="/">
+            <img src="/images/logo/logotype_horizontal.svg" alt="Mosquito" style="display: inline-block; width: 17rem;">
+          </a>
+        </h1>
+        <p>A lightweight background task framework for Crystal applications.</p>
+      </div>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito">Source Code</a> &middot;
+        <a href="https://mosquito-cr.github.io/mosquito/Mosquito.html">Docs</a> &middot;
+        <a href="/manual/index.html#installation">Getting Started</a> &middot;
+        <a href="/manual/index.html">Manual</a>
+      </nav>
+      <hr>
+
+
+<div class="two-column col-30-70">
+  <div class="column content">
+    <div id=toc>
+      
+
+      Other pages in the manual:
+
+      
+      <ul>
+      
+        
+      
+        
+          <li><a href="/manual/index.html">Mosquito Manual</a>
+        
+      
+        
+          <li><a href="/manual/lucky_framework.html">Using Mosquito with Lucky</a>
+        
+      
+        
+          <li><a href="/manual/rate_limiting.html">Rate Limiting Jobs</a>
+        
+      
+        
+          <li><a href="/manual/redis_backend.html">Redis Storage and Queuing Model</a>
+        
+      
+        
+          <li><a href="/manual/serialization.html">Custom Serialization</a>
+        
+      
+        
+          <li><a href="/manual/versioning.html">Versioning</a>
+        
+      
+      </ul>
+    </div>
+  </div>
+
+  <div class="column content">
+    <h1>Before/After Hooks</h1>
+    <p>All Jobs have a built in interface for executing code before and after a
+<code class="language-plaintext highlighter-rouge">#perform</code> method. This is a general purpose strategy for tasks like
+preemption, monitoring, rate limiting, failure notifications, etc.</p>
+
+<h1 id="before-hooks">Before Hooks</h1>
+
+<p>A before hook is one strategy to rate limit jobs which might have negative consequences for running too frequently.</p>
+
+<p>When a Job run needs to be delayed consider using <a href="https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#retry_later-instance-method">#retry_later</a> or <a href="https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#fail%28reason%3D%22%22%29-instance-method">#fail</a>.</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NotifyUserJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="n">params</span> <span class="n">user_id</span> <span class="p">:</span> <span class="no">Int32</span>
+
+  <span class="n">before</span> <span class="k">do</span>
+    <span class="c1"># prevent spamming a user with notifications</span>
+    <span class="nb">fail</span> <span class="k">if</span> <span class="p">(</span><span class="no">Time</span><span class="p">.</span><span class="nf">utc</span> <span class="o">-</span> <span class="n">user</span><span class="p">.</span><span class="nf">last_notification_sent</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">.</span><span class="nf">minutes</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="n">user</span><span class="p">.</span><span class="nf">last_notification_sent</span> <span class="o">=</span> <span class="no">Time</span><span class="p">.</span><span class="nf">utc</span>
+    <span class="n">user</span><span class="p">.</span><span class="nf">notify!</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">user</span> <span class="p">:</span> <span class="no">User</span>
+    <span class="n">found_user</span> <span class="o">=</span> <span class="no">UserService</span><span class="p">.</span><span class="nf">fetch</span> <span class="n">user_id</span>
+    <span class="nb">fail</span> <span class="k">unless</span> <span class="n">found_user</span>
+    <span class="n">found_user</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The mosquito built in <a href="/manual/rate_limiting.html">Rate Limiting module</a> makes use of a before hook to halt and reschedule a job run.</p>
+
+<h1 id="after-hooks">After Hooks</h1>
+
+<p>An after hook doesn’t have the ability to prevent a job from running. It gets run regardless of job success, even if a job throws an exception, or is never run due to a before hook.</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MonitoredJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="no">System</span><span class="p">.</span><span class="nf">long_running_failure_prone_task</span>
+  <span class="k">end</span>
+
+  <span class="n">after</span> <span class="k">do</span>
+    <span class="no">System</span><span class="p">.</span><span class="nf">send_admin_email</span><span class="p">(</span><span class="s2">"the long running task failed again"</span><span class="p">)</span> <span class="k">unless</span> <span class="n">succeeded?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>If a job fails implicitly by throwing an exception it is stored in the <code class="language-plaintext highlighter-rouge">#exception</code> variable and can be inspected in an after hook:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">FailingJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="k">raise</span> <span class="no">IndexError</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"Index out of bounds"</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="n">after</span> <span class="k">do</span>
+    <span class="k">if</span> <span class="n">failed</span> <span class="o">&amp;&amp;</span> <span class="n">thrown_exception</span> <span class="o">=</span> <span class="n">exception</span>
+      <span class="no">System</span><span class="p">.</span><span class="nf">send_admin_email</span><span class="p">(</span><span class="s2">"Job failed with an exception. </span><span class="si">#{</span><span class="n">thrown_exception</span><span class="p">.</span><span class="nf">message</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+  </div>
+</div>
+
+
+    <hr>
+
+    </div>
+    <footer>
+      <p>&copy; 2022</p>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+
