@@ -16,7 +16,7 @@ When a Job run needs to be delayed consider using [#retry_later](https://mosquit
 
 ```crystal
 class NotifyUserJob < Mosquito::QueuedJob
-  params user_id : Int32
+  param user_id : Int32
 
   before do
     # prevent spamming a user with notifications

@@ -12,7 +12,7 @@ For example, if 10 messages were enqueued for ThrottledJob at one time; 5 would 
 class ThrottledJob < Mosquito::QueuedJob
   include Mosquito::RateLimiter
 
-  params message : String
+  param message : String
   throttle limit: 5, per: 1.minute
 
   def perform

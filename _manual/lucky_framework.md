@@ -97,7 +97,7 @@ Lucky spends a _lot_ of energy helping you avoid mistakes in the typical web-req
 **src/jobs/send_email_job.cr**
 ```crystal
 class SendEmailJob < Mosquito::QueuedJob
-  params(user_id : Int64)
+  param user_id : Int64
 
   def perform
     user.send_email

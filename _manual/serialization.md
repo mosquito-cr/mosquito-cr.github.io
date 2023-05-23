@@ -33,7 +33,7 @@ end
 class MyJob < Mosquito::QueuedJob
   include SpecialtyObjectMosquitoSerializer
 
-  params specialty_object : SpecialtyObject
+  param specialty_object : SpecialtyObject
 
   def perform
     # ...

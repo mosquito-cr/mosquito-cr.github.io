@@ -74,7 +74,7 @@ end
 ```crystal
 # src/jobs/puts_job.cr
 class PutsJob < Mosquito::QueuedJob
-  params message : String
+  param message : String
 
   def perform
     puts message
@@ -177,7 +177,7 @@ This is a queued job:
 
 ```crystal
 class LongRunningTaskJob < Mosquito::QueuedJob
-  params user_id : Int32
+  param user_id : Int32
 
   def perform
     AssetCompressor.new(for: user).compress
@@ -244,7 +244,7 @@ method:
 
 ```crystal
 class SendWelcomeEmailJob < Mosquito::QueuedJob
-  params user : User
+  param user : User
 
   def perform
     if user.ready_to_welcome?
@@ -287,7 +287,7 @@ end
 
 # Parameters
 
-Job parameters can be declared with the `params` macro. Parameters are
+Job parameters can be declared with the `param` macro. Parameters are
 serialized, stored in Redis, and [deserialized](#primitive-serialization) before the
 [`Job#perform`](https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#perform-instance-method)
 method is called. A typed constructor is also declared so that enqueuing jobs
@@ -296,7 +296,7 @@ is defended by type safe code.
 ```crystal
 class SendEmailJob < Mosquito::QueuedJob
   # Declaring parameters also declares a typed constructor and getter methods
-  params(email_address : String)
+  param email_address : String
 
   # These will be generated:
   # def email_address : String?; ... end
@@ -314,7 +314,7 @@ be first, followed by optional parameters.
 
 ```crystal
 class SendEmailJob < Mosquito::QueuedJob
-  params(to : String, from : String = "no-reply@mosquito")
+  param to : String, from : String = "no-reply@mosquito"
 
   # generated code:
   # def initialize(@to : String, @from : String = "no-reply@mosquito"); ... end
