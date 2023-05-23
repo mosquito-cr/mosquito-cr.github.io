@@ -44,7 +44,7 @@ Mosquito::Runner.start
 ```crystal
 # src/jobs/puts_job.cr
 class PutsJob < Mosquito::QueuedJob
-  params message : String
+  param message : String
 
   def perform
     puts message
