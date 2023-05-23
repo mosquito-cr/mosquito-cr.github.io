@@ -85,7 +85,7 @@ preemption, monitoring, rate limiting, failure notifications, etc.</p>
 <p>When a Job run needs to be delayed consider using <a href="https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#retry_later-instance-method">#retry_later</a> or <a href="https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#fail%28reason%3D%22%22%29-instance-method">#fail</a>.</p>
 
 <div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NotifyUserJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
-  <span class="n">params</span> <span class="n">user_id</span> <span class="p">:</span> <span class="no">Int32</span>
+  <span class="n">param</span> <span class="n">user_id</span> <span class="p">:</span> <span class="no">Int32</span>
 
   <span class="n">before</span> <span class="k">do</span>
     <span class="c1"># prevent spamming a user with notifications</span>
@@ -145,7 +145,7 @@ preemption, monitoring, rate limiting, failure notifications, etc.</p>
 
     </div>
     <footer>
-      <p>&copy; 2022</p>
+      <p>&copy; 2023</p>
       <nav>
         <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
         <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>

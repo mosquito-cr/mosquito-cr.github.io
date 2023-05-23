@@ -43,9 +43,9 @@
     main: src/my_app.cr
 <span class="gi">+ worker:
 +   main: src/worker.cr
-</span>
-dependencies:
-<span class="gi">+  mosquito:
+</span><span class="err">
+</span><span class="p">dependencies:
+</span><span class="gi">+  mosquito:
 +    github: mosquito-cr/mosquito
 </span></code></pre></div></div>
 
@@ -71,7 +71,7 @@ dependencies:
 
 <div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># src/jobs/puts_job.cr</span>
 <span class="k">class</span> <span class="nc">PutsJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
-  <span class="n">params</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
+  <span class="n">param</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
 
   <span class="k">def</span> <span class="nf">perform</span>
     <span class="nb">puts</span> <span class="n">message</span>
@@ -105,7 +105,7 @@ dependencies:
 
     </div>
     <footer>
-      <p>&copy; 2022</p>
+      <p>&copy; 2023</p>
       <nav>
         <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
         <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>

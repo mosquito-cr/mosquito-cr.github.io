@@ -96,9 +96,9 @@
     main: src/start_server.cr
 <span class="gi">+ worker:
 +   main: src/app_worker.cr
-</span>
-dependencies:
-  lucky:
+</span><span class="err">
+</span><span class="p">dependencies:
+</span>  lucky:
     github: luckyframework/lucky
 <span class="gi">+  mosquito:
 +    github: robacarp/mosquito
@@ -116,9 +116,9 @@ require "authentic"
 <p><strong>src/app.cr</strong></p>
 
 <div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">require "./shards"
-</span>
-require "./app_database"
-<span class="p">require "./handlers/**"
+</span><span class="err">
+</span><span class="p">require "./app_database"
+require "./handlers/**"
 require "./models/base_model"
 require "./models/mixins/**"
 require "./models/**"
@@ -171,7 +171,7 @@ require "./app_server"
 
 <p><strong>src/jobs/send_email_job.cr</strong></p>
 <div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SendEmailJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
-  <span class="n">params</span><span class="p">(</span><span class="n">user_id</span> <span class="p">:</span> <span class="no">Int64</span><span class="p">)</span>
+  <span class="n">param</span> <span class="n">user_id</span> <span class="p">:</span> <span class="no">Int64</span>
 
   <span class="k">def</span> <span class="nf">perform</span>
     <span class="n">user</span><span class="p">.</span><span class="nf">send_email</span>
@@ -208,7 +208,7 @@ require "./app_server"
 
     </div>
     <footer>
-      <p>&copy; 2022</p>
+      <p>&copy; 2023</p>
       <nav>
         <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
         <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>

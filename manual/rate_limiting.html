@@ -81,7 +81,7 @@
 <div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ThrottledJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
   <span class="kp">include</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">RateLimiter</span>
 
-  <span class="n">params</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
+  <span class="n">param</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
   <span class="n">throttle</span> <span class="ss">limit: </span><span class="mi">5</span><span class="p">,</span> <span class="ss">per: </span><span class="mi">1</span><span class="p">.</span><span class="nf">minute</span>
 
   <span class="k">def</span> <span class="nf">perform</span>
@@ -98,7 +98,7 @@
 
     </div>
     <footer>
-      <p>&copy; 2022</p>
+      <p>&copy; 2023</p>
       <nav>
         <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
         <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>

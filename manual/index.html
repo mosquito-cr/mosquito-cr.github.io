@@ -199,7 +199,7 @@ config is persisted in Redis after a task fails.</li>
 
 <div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># src/jobs/puts_job.cr</span>
 <span class="k">class</span> <span class="nc">PutsJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
-  <span class="n">params</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
+  <span class="n">param</span> <span class="n">message</span> <span class="p">:</span> <span class="no">String</span>
 
   <span class="k">def</span> <span class="nf">perform</span>
     <span class="nb">puts</span> <span class="n">message</span>
@@ -309,7 +309,7 @@ again later on the pre-existing schedule.</p>
 <p>This is a queued job:</p>
 
 <div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">LongRunningTaskJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
-  <span class="n">params</span> <span class="n">user_id</span> <span class="p">:</span> <span class="no">Int32</span>
+  <span class="n">param</span> <span class="n">user_id</span> <span class="p">:</span> <span class="no">Int32</span>
 
   <span class="k">def</span> <span class="nf">perform</span>
     <span class="no">AssetCompressor</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">for: </span><span class="n">user</span><span class="p">).</span><span class="nf">compress</span>
@@ -375,7 +375,7 @@ scheduled for a retry.</p>
 method:</p>
 
 <div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SendWelcomeEmailJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
-  <span class="n">params</span> <span class="n">user</span> <span class="p">:</span> <span class="no">User</span>
+  <span class="n">param</span> <span class="n">user</span> <span class="p">:</span> <span class="no">User</span>
 
   <span class="k">def</span> <span class="nf">perform</span>
     <span class="k">if</span> <span class="n">user</span><span class="p">.</span><span class="nf">ready_to_welcome?</span>
@@ -418,7 +418,7 @@ prefixes log messages with the job name:</p>
 <h1 id="parameters">
 <a class="anchor" href="#parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Parameters</h1>
 
-<p>Job parameters can be declared with the <code class="language-plaintext highlighter-rouge">params</code> macro. Parameters are
+<p>Job parameters can be declared with the <code class="language-plaintext highlighter-rouge">param</code> macro. Parameters are
 serialized, stored in Redis, and <a href="#primitive-serialization">deserialized</a> before the
 <a href="https://mosquito-cr.github.io/mosquito/Mosquito/Job.html#perform-instance-method"><code class="language-plaintext highlighter-rouge">Job#perform</code></a>
 method is called. A typed constructor is also declared so that enqueuing jobs
@@ -426,7 +426,7 @@ is defended by type safe code.</p>
 
 <div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SendEmailJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
   <span class="c1"># Declaring parameters also declares a typed constructor and getter methods</span>
-  <span class="n">params</span><span class="p">(</span><span class="n">email_address</span> <span class="p">:</span> <span class="no">String</span><span class="p">)</span>
+  <span class="n">param</span> <span class="n">email_address</span> <span class="p">:</span> <span class="no">String</span>
 
   <span class="c1"># These will be generated:</span>
   <span class="c1"># def email_address : String?; ... end</span>
@@ -444,7 +444,7 @@ semantics for default value parameters on a method. Required parameters should
 be first, followed by optional parameters.</p>
 
 <div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SendEmailJob</span> <span class="o">&lt;</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">QueuedJob</span>
-  <span class="n">params</span><span class="p">(</span><span class="n">to</span> <span class="p">:</span> <span class="no">String</span><span class="p">,</span> <span class="n">from</span> <span class="p">:</span> <span class="no">String</span> <span class="o">=</span> <span class="s2">"no-reply@mosquito"</span><span class="p">)</span>
+  <span class="n">param</span> <span class="n">to</span> <span class="p">:</span> <span class="no">String</span><span class="p">,</span> <span class="n">from</span> <span class="p">:</span> <span class="no">String</span> <span class="o">=</span> <span class="s2">"no-reply@mosquito"</span>
 
   <span class="c1"># generated code:</span>
   <span class="c1"># def initialize(@to : String, @from : String = "no-reply@mosquito"); ... end</span>
@@ -584,7 +584,7 @@ knows how to serialize and de-serialize many of the Crystal primitives:</p>
 
     </div>
     <footer>
-      <p>&copy; 2022</p>
+      <p>&copy; 2023</p>
       <nav>
         <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
         <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>
