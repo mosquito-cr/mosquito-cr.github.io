@@ -38,7 +38,12 @@
 <li class="toc-entry toc-h1"><a href="#terminology">Terminology</a></li>
 <li class="toc-entry toc-h1"><a href="#usage">Usage</a>
 <ul>
-<li class="toc-entry toc-h2"><a href="#installation">Installation</a></li>
+<li class="toc-entry toc-h2"><a href="#installation">Installation</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#mosquito-as-a-dedicated-worker">Mosquito as a dedicated worker.</a></li>
+<li class="toc-entry toc-h3"><a href="#mosquito-in-process-worker">Mosquito in-process worker</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h2"><a href="#configuration">Configuration</a></li>
 <li class="toc-entry toc-h2"><a href="#declaring-a-job">Declaring a job</a></li>
 <li class="toc-entry toc-h2"><a href="#queuing-a-job">Queuing a job</a></li>
@@ -111,6 +116,10 @@
         
       
         
+          <li><a href="/manual/testing.html">Testing</a>
+        
+      
+        
           <li><a href="/manual/versioning.html">Versioning</a>
         
       
@@ -126,7 +135,7 @@
 <p><strong>Job</strong> - a collection of code which can be run several times, either on
 demand, scheduled for a specific time, or periodically.</p>
 
-<p><strong>Task</strong> - A specific unit of work to be performed by a job.</p>
+<p><strong>JobRun</strong> - A specific unit of work to be performed by a job, including the parameters required to run the job.</p>
 
 <p><strong>PeriodicJob</strong> - A job which is automatically scheduled to run once every
 interval.</p>
@@ -146,8 +155,15 @@ as possible.</p>
 </span><span class="gi">+  mosquito:
 +    github: mosquito-cr/mosquito
 </span></code></pre></div></div>
-<p> </p>
-<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># require your application here</span>
+
+<p>The mosquito runner can be activated by a dedicated executable or launched as part of your application boot sequence, or both.</p>
+
+<h3 id="mosquito-as-a-dedicated-worker">
+<a class="anchor" href="#mosquito-as-a-dedicated-worker" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mosquito as a dedicated worker.</h3>
+
+<p>Here is a sample worker executable:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># require your application libraries here, but don't boot the application itself.</span>
 <span class="nb">require</span> <span class="s2">"./my_application/*.cr"</span>
 
 <span class="no">Mosquito</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">settings</span><span class="o">|</span>
@@ -158,6 +174,28 @@ as possible.</p>
 </code></pre></div></div>
 
 <p>Your worker can then be run using <code class="language-plaintext highlighter-rouge">crystal run src/worker.cr</code>.</p>
+
+<h3 id="mosquito-in-process-worker">
+<a class="anchor" href="#mosquito-in-process-worker" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mosquito in-process worker</h3>
+
+<p>Mosquito can also <code class="language-plaintext highlighter-rouge">spawn</code> to parallelize worker execution.</p>
+
+<p>Here is an example which runs the Mosquito worker in-process as part of a
+typical application boot sequence. Runner.start returns immediately and the
+rest of the application boot can continue.</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s2">"./my_application"</span>
+
+<span class="no">Mosquito</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">settings</span><span class="o">|</span>
+  <span class="n">settings</span><span class="p">.</span><span class="nf">redis_url</span> <span class="o">=</span> <span class="s2">"redis://path-to-your-redis:6379"</span>
+<span class="k">end</span>
+
+<span class="c1"># Activate the runner asynchronously</span>
+<span class="no">Mosquito</span><span class="o">::</span><span class="no">Runner</span><span class="p">.</span><span class="nf">start</span><span class="p">(</span><span class="ss">spin: </span><span class="kp">false</span><span class="p">)</span>
+
+<span class="c1"># Start your application</span>
+<span class="no">MyApplication</span><span class="p">.</span><span class="nf">run</span>
+</code></pre></div></div>
 
 <h2 id="configuration">
 <a class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h2>
@@ -180,7 +218,7 @@ is persisted in Redis after a task succeeds.</li>
 <code class="language-plaintext highlighter-rouge">failed_job_ttl : Int = 86400</code> (Seconds, default: 1 day) - how long a job
 config is persisted in Redis after a task fails.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">run_cron_scheduler : Bool = true</code> - toggle the cron scheduler on or off.</li>
+<code class="language-plaintext highlighter-rouge">use_distributed_lock : Bool = true</code> - toggle the distributed lock behavior.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">run_from : Array(String) = []</code> - a list of queue names to pull jobs from.</li>
 </ul>
@@ -459,15 +497,15 @@ macro.</p>
 <a class="anchor" href="#caveats" aria-hidden="true"><span class="octicon octicon-link"></span></a>Caveats</h2>
 
 <p>Be careful when adding parameters to a Job definition when jobs are already
-running in production. Tasks which are stored for later execution in redis will
-fail because the parameters don’t all exist in the serialized task. Consider
-this example:</p>
+running in production. Tasks which are stored for later execution will fail
+because the parameters don’t all exist in the serialized task. Consider this
+example:</p>
 
 <ul>
   <li>
-<code class="language-plaintext highlighter-rouge">RemindUserAboutAbandonedCartJob</code> with params: email_address, last_active_date</li>
+<code class="language-plaintext highlighter-rouge">RemindUserAboutAbandonedCartJob</code> with parameters: email_address, last_active_date</li>
   <li>A user joins, and the task is enqueued</li>
-  <li>new code is deployed, <code class="language-plaintext highlighter-rouge">RemindUserAboutAbandonedCartJob</code> now has params:
+  <li>new code is deployed, <code class="language-plaintext highlighter-rouge">RemindUserAboutAbandonedCartJob</code> now has parameters:
 email_address, last_active_date, join_date</li>
   <li>when the task is popped off the queue, it doesn’t contain a serialized join_date</li>
 </ul>

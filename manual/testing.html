@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-type'>
+    <title>Mosquito</title>
+    <link href="/css/main.css" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/images/logo/logomark.svg" type="image/svg+xml">
+    <link rel="alternate" type="application/atom+xml" href="/atom.xml">
+    <meta config="NOFOLLOW,NOINDEX" name="robots">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="header">
+        <h1>
+          <a href="/">
+            <img src="/images/logo/logotype_horizontal.svg" alt="Mosquito" style="display: inline-block; width: 17rem;">
+          </a>
+        </h1>
+        <p>A lightweight background task framework for Crystal applications.</p>
+      </div>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito">Source Code</a> &middot;
+        <a href="https://mosquito-cr.github.io/mosquito/Mosquito.html">Docs</a> &middot;
+        <a href="/manual/index.html#installation">Getting Started</a> &middot;
+        <a href="/manual/index.html">Manual</a>
+      </nav>
+      <hr>
+
+
+<div class="two-column col-30-70">
+  <div class="column content">
+    <div id=toc>
+      
+
+      Other pages in the manual:
+
+      
+      <ul>
+      
+        
+          <li><a href="/manual/error_reporting.html">Error Handling for Jobs</a>
+        
+      
+        
+          <li><a href="/manual/hooks.html">Before/After Hooks</a>
+        
+      
+        
+          <li><a href="/manual/index.html">Mosquito Manual</a>
+        
+      
+        
+          <li><a href="/manual/lucky_framework.html">Using Mosquito with Lucky</a>
+        
+      
+        
+          <li><a href="/manual/rate_limiting.html">Rate Limiting Jobs</a>
+        
+      
+        
+          <li><a href="/manual/redis_backend.html">Redis Storage and Queuing Model</a>
+        
+      
+        
+          <li><a href="/manual/serialization.html">Custom Serialization</a>
+        
+      
+        
+      
+        
+          <li><a href="/manual/versioning.html">Versioning</a>
+        
+      
+      </ul>
+    </div>
+  </div>
+
+  <div class="column content">
+    <h1>Testing</h1>
+    <p>Mosquito provides a testing backend which keeps track of jobs which have been enqueued.</p>
+
+<p>To activate the testing backend add this configuration to <code class="language-plaintext highlighter-rouge">test_helper.cr</code> or the equivalent in your project.</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Mosquito</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">settings</span><span class="o">|</span>
+  <span class="n">settings</span><span class="p">.</span><span class="nf">backend</span> <span class="o">=</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">TestBackend</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Then in your tests:</p>
+
+<div class="language-crystal highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">describe</span> <span class="s2">"testing"</span> <span class="k">do</span>
+  <span class="n">it</span> <span class="s2">"enqueues the job"</span> <span class="k">do</span>
+    <span class="c1"># build and enqueue a job</span>
+    <span class="n">job_run</span> <span class="o">=</span> <span class="no">EchoJob</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">text: </span><span class="s2">"hello world"</span><span class="p">).</span><span class="nf">enqueue</span>
+
+    <span class="c1"># assert that the job was enqueued</span>
+    <span class="n">lastest_enqueued_job</span> <span class="o">=</span> <span class="no">Mosquito</span><span class="o">::</span><span class="no">TestBackend</span><span class="p">.</span><span class="nf">enqueued_jobs</span><span class="p">.</span><span class="nf">last</span>
+
+    <span class="c1"># check the job config</span>
+    <span class="n">assert_equal</span> <span class="s2">"hello world"</span><span class="p">,</span> <span class="n">latest_enqueued_job</span><span class="p">.</span><span class="nf">config</span><span class="p">[</span><span class="s2">"text"</span><span class="p">]</span>
+
+    <span class="c1"># check the job_id matches</span>
+    <span class="n">assert_equal</span> <span class="n">job_run</span><span class="p">.</span><span class="nf">id</span><span class="p">,</span> <span class="n">latest_enqueued_job</span><span class="p">.</span><span class="nf">id</span>
+
+    <span class="c1"># optionally, truncate the history</span>
+    <span class="no">Mosquito</span><span class="o">::</span><span class="no">TestBackend</span><span class="p">.</span><span class="nf">flush_enqueued_jobs!</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+  </div>
+</div>
+
+
+    <hr>
+
+    </div>
+    <footer>
+      <p>&copy; 2023</p>
+      <nav>
+        <a href="https://github.com/mosquito-cr/mosquito-cr.github.io">Website Source</a> &middot;
+        <a href="https://github.com/mosquito-cr/mosquito/contributors">Project Contributors</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+
