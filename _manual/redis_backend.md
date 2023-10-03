@@ -4,7 +4,7 @@ title: Redis Storage and Queuing Model
 toc: true
 ---
 
-Mosquito's default (currently: only) backend is Redis. The redis data model leverages as much atomicity as possible from redis primitives to decrease the risk of double-run errors, lost jobs, etc.
+Mosquito's default backend is Redis. The redis data model leverages as much atomicity as possible from redis primitives to decrease the risk of double-run errors, lost jobs, etc.
 
 There are two general storage mechanisms at play: hash-like metadata and queuing data.
 
