@@ -9,7 +9,7 @@ title: Mosquito Manual
 **Job** - a collection of code which can be run several times, either on
 demand, scheduled for a specific time, or periodically.
 
-**Task** - A specific unit of work to be performed by a job.
+**JobRun** - A specific unit of work to be performed by a job, including the parameters required to run the job.
 
 **PeriodicJob** - A job which is automatically scheduled to run once every
 interval.
@@ -28,9 +28,15 @@ dependencies:
 +  mosquito:
 +    github: mosquito-cr/mosquito
 ```
-&nbsp;
+
+The mosquito runner can be activated by a dedicated executable or launched as part of your application boot sequence, or both.
+
+### Mosquito as a dedicated worker.
+
+Here is a sample worker executable:
+
 ```crystal
-# require your application here
+# require your application libraries here, but don't boot the application itself.
 require "./my_application/*.cr"
 
 Mosquito.configure do |settings|
@@ -41,6 +47,28 @@ Mosquito::Runner.start
 ```
 
 Your worker can then be run using `crystal run src/worker.cr`.
+
+### Mosquito in-process worker
+
+Mosquito can also `spawn` to parallelize worker execution.
+
+Here is an example which runs the Mosquito worker in-process as part of a
+typical application boot sequence. Runner.start returns immediately and the
+rest of the application boot can continue.
+
+```crystal
+require "./my_application"
+
+Mosquito.configure do |settings|
+  settings.redis_url = "redis://path-to-your-redis:6379"
+end
+
+# Activate the runner asynchronously
+Mosquito::Runner.start(spin: false)
+
+# Start your application
+MyApplication.run
+```
 
 ## Configuration
 
@@ -56,7 +84,7 @@ settings should suffice most runner configurations.
   is persisted in Redis after a task succeeds.
 - `failed_job_ttl : Int = 86400` (Seconds, default: 1 day) - how long a job
   config is persisted in Redis after a task fails.
-- `run_cron_scheduler : Bool = true` - toggle the cron scheduler on or off.
+- `use_distributed_lock : Bool = true` - toggle the distributed lock behavior.
 - `run_from : Array(String) = []` - a list of queue names to pull jobs from.
 
 Example:
