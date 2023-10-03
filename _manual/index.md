@@ -356,13 +356,13 @@ macro.
 ## Caveats
 
 Be careful when adding parameters to a Job definition when jobs are already
-running in production. Tasks which are stored for later execution in redis will
-fail because the parameters don't all exist in the serialized task. Consider
-this example:
+running in production. Tasks which are stored for later execution will fail
+because the parameters don't all exist in the serialized task. Consider this
+example:
 
-- `RemindUserAboutAbandonedCartJob` with params: email_address, last_active_date
+- `RemindUserAboutAbandonedCartJob` with parameters: email_address, last_active_date
 - A user joins, and the task is enqueued
-- new code is deployed, `RemindUserAboutAbandonedCartJob` now has params:
+- new code is deployed, `RemindUserAboutAbandonedCartJob` now has parameters:
   email_address, last_active_date, join_date
 - when the task is popped off the queue, it doesn't contain a serialized join_date
 
